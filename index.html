@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Egyptian Arabic Challenge: Eih da? / Eih di?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fcfbfe;
+            --card-bg: #ffffff;
+            --primary-lavender: #9b72cf;
+            --light-lavender: #f3eef8;
+            --mint-green: #4ade80;
+            --mint-bg: #f0fdf4;
+            --peach: #fb923c;
+            --peach-bg: #fff7ed;
+            --light-blue: #38bdf8;
+            --blue-bg: #f0f9ff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 10px 25px -5px rgba(155, 114, 207, 0.1), 0 8px 10px -6px rgba(155, 114, 207, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--light-lavender);
+            padding-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-lavender);
+            font-weight: 700;
+        }
+
+        .audio-toggle {
+            background: var(--light-lavender);
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--primary-lavender);
+            transition: all 0.2s;
+        }
+
+        .audio-toggle:hover {
+            background: var(--primary-lavender);
+            color: white;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Welcome Screen */
+        .welcome-box {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .welcome-box h2 {
+            font-size: 2rem;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
+
+        .welcome-box p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-lavender);
+        }
+
+        .btn {
+            background: var(--primary-lavender);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            box-shadow: 0 4px 12px rgba(155, 114, 207, 0.3);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* Game Header / Progress */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background: var(--light-lavender);
+            border-radius: 5px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary-lavender);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Question Card */
+        .question-card {
+            text-align: center;
+        }
+
+        .round-badge {
+            display: inline-block;
+            background: var(--light-lavender);
+            color: var(--primary-lavender);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .question-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .image-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px auto;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid var(--border-color);
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-lavender);
+            background: var(--light-lavender);
+        }
+
+        .option-btn.correct {
+            background: var(--mint-bg) !important;
+            border-color: var(--mint-green) !important;
+            color: #166534 !important;
+        }
+
+        .option-btn.incorrect {
+            background: var(--peach-bg) !important;
+            border-color: var(--peach) !important;
+            color: #9a3412 !important;
+        }
+
+        .arabic-sub {
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.1rem;
+            direction: rtl;
+        }
+
+        /* Feedback Box */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .feedback-box.correct-msg {
+            background: var(--mint-bg);
+            color: #166534;
+            border: 1px solid var(--mint-green);
+        }
+
+        .feedback-box.incorrect-msg {
+            background: var(--peach-bg);
+            color: #9a3412;
+            border: 1px solid var(--peach);
+        }
+
+        .next-btn {
+            margin-top: 20px;
+            display: none;
+            width: 100%;
+        }
+
+        /* Drag/Sort Activity Styles */
+        .sort-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone {
+            flex: 1;
+            min-height: 180px;
+            border: 3px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+            background: #fafaf9;
+            transition: background 0.2s;
+        }
+
+        .drop-zone.highlight {
+            background: var(--light-lavender);
+            border-color: var(--primary-lavender);
+        }
+
+        .drop-zone h3 {
+            margin-bottom: 10px;
+            color: var(--primary-lavender);
+        }
+
+        .draggable-item {
+            background: white;
+            border: 2px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: grab;
+            margin-bottom: 10px;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .draggable-item img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        /* Results Screen */
+        .results-box {
+            text-align: center;
+        }
+
+        .results-box h2 {
+            font-size: 2rem;
+            color: var(--primary-lavender);
+            margin-bottom: 10px;
+        }
+
+        .score-badge {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 15px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .stat-card {
+            background: var(--light-lavender);
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .tip-box {
+            background: var(--blue-bg);
+            border: 1px solid var(--light-blue);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            color: #0369a1;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .results-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        @media(max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .results-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Egyptian Arabic Challenge</h1>
+            <button class="audio-toggle" id="audioToggle" onclick="toggleAudio()">🔊 Sound: ON</button>
+        </header>
+
+        <!-- SCREEN 1: WELCOME & STUDENT INFO -->
+        <div id="welcomeScreen" class="screen active">
+            <div class="welcome-box">
+                <h2>Eih da? / Eih di?</h2>
+                <p>Welcome to the Egyptian Arabic Challenge!<br>Let's see how well you can identify objects and use <strong>DA (ده)</strong> and <strong>DI (دي)</strong>.<br>Study the pictures, read the questions carefully, and choose the correct answers!</p>
+                
+                <div class="form-group">
+                    <label for="studentName">Student Name *</label>
+                    <input type="text" id="studentName" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="studentEmail">Student Email (Optional for results)</label>
+                    <input type="email" id="studentEmail" placeholder="Enter your email address">
+                </div>
+
+                <button class="btn" onclick="startGame()">Start Game</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: GAMEPLAY -->
+        <div id="gameScreen" class="screen">
+            <div class="game-header">
+                <span id="roundIndicator">Round 1: What Is This?</span>
+                <span id="scoreTracker">Score: 0</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+
+            <div class="question-card">
+                <div class="round-badge" id="badgeText">Question 1</div>
+                <div class="question-title" id="questionTitle">What Is This?</div>
+                
+                <div class="image-container">
+                    <img id="questionImage" src="" alt="Lesson Object">
+                </div>
+
+                <div class="options-grid" id="optionsGrid">
+                    <!-- Dynamic Options -->
+                </div>
+
+                <div class="feedback-box" id="feedbackBox"></div>
+                <button class="btn next-btn" id="nextBtn" onclick="nextQuestion()">Next Question</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: RESULTS -->
+        <div id="resultsScreen" class="screen">
+            <div class="results-box">
+                <h2>Congratulations!</h2>
+                <p id="congratsMessage">You finished the Egyptian Arabic Challenge!</p>
+                <div class="score-badge" id="finalScoreDisplay">0%</div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">Student Name: <span id="resName">-</span></div>
+                    <div class="stat-card">Total Questions: <span id="resTotal">25</span></div>
+                    <div class="stat-card">First Attempt Correct: <span id="resFirstCorrect">0</span></div>
+                    <div class="stat-card">Accuracy Percentage: <span id="resAccuracy">0%</span></div>
+                    <div class="stat-card">Time Spent: <span id="resTime">0m 0s</span></div>
+                    <div class="stat-card">Round Scores: <span id="resRounds">-</span></div>
+                </div>
+
+                <div class="tip-box" id="improvementTip">
+                    <strong>Personalized Improvement Tip:</strong> Keep reviewing masculine (Da) and feminine (-a ending / Di) patterns!
+                </div>
+
+                <div class="results-actions">
+                    <button class="btn" onclick="restartGame()">Restart Game</button>
+                    <button class="btn" style="background: var(--mint-green); color: #064e3b;" onclick="submitResults()" id="submitBtn">Submit Results</button>
+                </div>
+                <div id="submitStatus" style="margin-top: 15px; font-weight: 600;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- EMBEDDED LESSON IMAGES (Base64 from Source PDF Slides) ---
+        // Sourced precisely from presentation pages[cite: 1, 3, 4, 6, 7, 8, 9]
+        const ASSETS = {
+            talaga: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='30' y='10' width='40' height='80' rx='5' fill='%23e2e8f0'/><rect x='35' y='15' width='30' height='30' rx='3' fill='%23cbd5e1'/><rect x='35' y='50' width='30' height='35' rx='3' fill='%23cbd5e1'/><circle cx='60' cy='30' r='2' fill='%2364748b'/><circle cx='60' cy='65' r='2' fill='%2364748b'/></svg>",
+            ghassala: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='25' y='15' width='50' height='70' rx='5' fill='%23e2e8f0'/><circle cx='50' cy='55' r='20' fill='%23cbd5e1'/><circle cx='50' cy='55' r='15' fill='%23f8fafc'/><circle cx='40' cy='25' r='3' fill='%2364748b'/></svg>",
+            botagaz: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='25' y='30' width='50' height='55' rx='3' fill='%23cbd5e1'/><circle cx='40' cy='20' r='6' fill='%2364748b'/><circle cx='60' cy='20' r='6' fill='%2364748b'/><rect x='35' y='45' width='30' height='25' rx='2' fill='%2394a3b8'/></svg>",
+            forn: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='20' y='25' width='60' height='50' rx='5' fill='%23475569'/><rect x='28' y='35' width='44' height='30' rx='3' fill='%231e293b'/><rect x='35' y='28' width='30' height='4' rx='2' fill='%23cbd5e1'/></svg>",
+            microwave: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='15' y='30' width='70' height='40' rx='5' fill='%23cbd5e1'/><rect x='22' y='38' width='35' height='25' rx='2' fill='%231e293b'/><rect x='65' y='38' width='12' height='25' rx='2' fill='%2394a3b8'/></svg>",
+            televizyon: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='15' y='25' width='70' height='45' rx='6' fill='%23facc15'/><rect x='20' y='30' width='60' height='35' rx='3' fill='%231e293b'/><line x1='35' y1='25' x2='25' y2='12' stroke='%231e293b' stroke-width='3'/><line x1='65' y1='25' x2='75' y2='12' stroke='%231e293b' stroke-width='3'/><rect x='40' y='70' width='20' height='8' fill='%231e293b'/></svg>",
+            takyeef: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='15' y='35' width='70' height='30' rx='8' fill='%23e2e8f0'/><line x1='25' y1='50' x2='75' y2='50' stroke='%2394a3b8' stroke-width='3'/><rect x='30' y='40' width='12' height='4' rx='2' fill='%2364748b'/></svg>",
+            marwa7a: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='45' r='12' fill='%2364748b'/><path d='M50 45 Q30 20 20 40 Q30 50 50 45Z' fill='%23cbd5e1'/><path d='M50 45 Q70 20 80 40 Q70 50 50 45Z' fill='%23cbd5e1'/><path d='M50 45 Q20 70 40 80 Q50 70 50 45Z' fill='%23cbd5e1'/><path d='M50 45 Q80 70 60 80 Q50 70 50 45Z' fill='%23cbd5e1'/><rect x='46' y='55' width='8' height='30' fill='%23475569'/></svg>",
+            kattle: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M35 35 C35 30 65 30 65 35 L70 70 C70 75 30 75 30 70 Z' fill='%233b82f6'/><path d='M65 40 Q80 45 68 60' fill='none' stroke='%233b82f6' stroke-width='6'/><path d='M42 30 Q50 15 58 30' fill='none' stroke='%23cbd5e1' stroke-width='6'/></svg>",
+            saggada: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='20' y='25' width='60' height='50' rx='10' fill='%230ea5e9'/><rect x='25' y='30' width='50' height='40' rx='5' fill='%2338bdf8'/><circle cx='50' cy='50' r='12' fill='%23bae6fd'/></svg>",
+            setara: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='15' y='15' width='70' height='8' fill='%23475569'/><path d='M20 23 Q35 50 20 85 L40 85 Q55 50 40 23 Z' fill='%23f472b6'/><path d='M60 23 Q75 50 60 85 L80 85 Q95 50 80 23 Z' fill='%23f472b6'/></svg>",
+            kanaba: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='20' y='40' width='60' height='35' rx='8' fill='%2306b6d4'/><rect x='15' y='35' width='15' height='40' rx='6' fill='%230891b2'/><rect x='70' y='35' width='15' height='40' rx='6' fill='%230891b2'/><rect x='25' y='55' width='50' height='15' rx='4' fill='%2367e8f9'/></svg>",
+            tarabeiza: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='20' y='40' width='60' height='12' rx='3' fill='%23d97706'/><rect x='25' y='52' width='8' height='30' fill='%23b45309'/><rect x='67' y='52' width='8' height='30' fill='%23b45309'/></svg>",
+            korsi: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='35' y='25' width='30' height='30' rx='4' fill='%23d97706'/><rect x='35' y='55' width='30' height='8' rx='2' fill='%23b45309'/><rect x='38' y='63' width='5' height='22' fill='%23b45309'/><rect x='57' y='63' width='5' height='22' fill='%23b45309'/></svg>",
+            sereir: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='20' y='45' width='60' height='30' rx='4' fill='%233b82f6'/><rect x='20' y='35' width='12' height='40' rx='3' fill='%23b45309'/><rect x='24' y='48' width='14' height='10' rx='3' fill='%23ffffff'/></svg>",
+            dolab: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='25' y='15' width='50' height='70' rx='3' fill='%2392400e'/><line x1='50' y1='15' x2='50' y2='85' stroke='%2378350f' stroke-width='3'/><circle cx='45' cy='50' r='2' fill='%23fef3c7'/><circle cx='55' cy='50' r='2' fill='%23fef3c7'/></svg>",
+            meraya: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='32' y='15' width='36' height='55' rx='18' fill='%2394a3b8'/><rect x='36' y='19' width='28' height='47' rx='14' fill='%23e0f2fe'/><rect x='44' y='70' width='12' height='12' fill='%2364748b'/></svg>",
+            lamba: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M38 35 Q50 15 62 35 Q68 50 58 60 L58 70 L42 70 L42 60 Q32 50 38 35 Z' fill='%23facc15'/><rect x='42' y='70' width='16' height='12' rx='2' fill='%2364748b'/></svg>",
+            maktaba: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='25' y='15' width='50' height='70' rx='3' fill='%23b45309'/><line x1='25' y1='35' x2='75' y2='35' stroke='%2392400e' stroke-width='3'/><line x1='25' y1='55' x2='75' y2='55' stroke='%2392400e' stroke-width='3'/><line x1='25' y1='75' x2='75' y2='75' stroke='%2392400e' stroke-width='3'/></svg>"
+        };
+
+        // --- QUESTION BANK (5 Rounds, 25 Questions Total) ---
+        const roundsData = [
+            // Round 1: What Is This? (Object Identification)
+            {
+                roundNum: 1,
+                roundName: "Round 1: What Is This?",
+                questions: [
+                    { image: ASSETS.talaga, franco: "Di talaga.", arabic: "دي تلاجة", options: [{f:"Di talaga.", a:"دي تlaجة"}, {f:"Da talaga.", a:"ده تلاجة"}, {f:"Di korsi.", a:"دي كرسي"}, {f:"Da korsi.", a:"ده كرسي"}], correct: 0 },
+                    { image: ASSETS.korsi, franco: "Da korsi.", arabic: "ده كرسي", options: [{f:"Di korsi.", a:"دي كرسي"}, {f:"Da korsi.", a:"ده كرسي"}, {f:"Da sereir.", a:"ده سرير"}, {f:"Di setara.", a:"دي ستارة"}], correct: 1 },
+                    { image: ASSETS.televizyon, franco: "Da televizyon.", arabic: "ده تلفزيون", options: [{f:"Di televizyon.", a:"دي تلفزيون"}, {f:"Da televizyon.", a:"ده تلفزيون"}, {f:"Da microwave.", a:"ده ميكروويف"}, {f:"Di lamba.", a:"دي لمبة"}], correct: 1 },
+                    { image: ASSETS.kanaba, franco: "Di kanaba.", arabic: "دي كنبة", options: [{f:"Da kanaba.", a:"ده كنبة"}, {f:"Di kanaba.", a:"دي كنبة"}, {f:"Di tarabeiza.", a:"دي ترابيزة"}, {f:"Da korsi.", a:"ده كرسي"}], correct: 1 },
+                    { image: ASSETS.sereir, franco: "Da sereir.", arabic: "ده سرير", options: [{f:"Di sereir.", a:"دي سرير"}, {f:"Da dolab.", a:"ده دولاب"}, {f:"Da sereir.", a:"ده سرير"}, {f:"Di meraya.", a:"دي مراية"}], correct: 2 }
+                ]
+            },
+            // Round 2: Choose DA or DI
+            {
+                roundNum: 2,
+                roundName: "Round 2: Choose DA or DI",
+                questions: [
+                    { image: ASSETS.ghassala, franco: "Ghassala (Washing Machine)", arabic: "غسالة", options: [{f:"Da ghassala", a:"ده غسالة"}, {f:"Di ghassala", a:"دي غسالة"}], correct: 1 },
+                    { image: ASSETS.botagaz, franco: "Botagaz (Stove)", arabic: "بوتاجاز", options: [{f:"Da botagaz", a:"ده بوتاجاز"}, {f:"Di botagaz", a:"دي بوتاجاز"}], correct: 0 },
+                    { image: ASSETS.setara, franco: "Setara (Curtain)", arabic: "ستارة", options: [{f:"Da setara", a:"ده ستارة"}, {f:"Di setara", a:"دي ستارة"}], correct: 1 },
+                    { image: ASSETS.takyeef, franco: "Takyeef (Air Conditioner)", arabic: "تكييف", options: [{f:"Da takyeef", a:"ده تكييف"}, {f:"Di takyeef", a:"دي تكييف"}], correct: 0 },
+                    { image: ASSETS.meraya, franco: "Meraya (Mirror)", arabic: "مراية", options: [{f:"Da meraya", a:"ده مراية"}, {f:"Di meraya", a:"دي مراية"}], correct: 1 }
+                ]
+            },
+            // Round 3: Complete the Answer
+            {
+                roundNum: 3,
+                roundName: "Round 3: Complete the Answer",
+                questions: [
+                    { image: ASSETS.forn, prompt: "Eih da? — إيه ده؟", franco: "Da forn.", arabic: "ده فرن", options: [{f:"Da forn.", a:"ده فرن"}, {f:"Di forn.", a:"دي فرن"}, {f:"Da kattle.", a:"ده كاتل"}, {f:"Di lamba.", a:"دي لمبة"}], correct: 0 },
+                    { image: ASSETS.lamba, prompt: "Eih di? — إيه دي؟", franco: "Di lamba.", arabic: "دي لمبة", options: [{f:"Da lamba.", a:"ده لمبة"}, {f:"Di lamba.", a:"دي لمبة"}, {f:"Di maktaba.", a:"دي مكتبة"}, {f:"Da dolab.", a:"ده دولاب"}], correct: 1 },
+                    { image: ASSETS.kattle, prompt: "Eih da? — إيه ده؟", franco: "Da kattle.", arabic: "ده كاتل", options: [{f:"Di kattle.", a:"دي كاتل"}, {f:"Da microwave.", a:"ده ميكروويف"}, {f:"Da kattle.", a:"ده كاتل"}, {f:"Di marwa7a.", a:"دي مروحة"}], correct: 2 },
+                    { image: ASSETS.tarabeiza, prompt: "Eih di? — إيه دي؟", franco: "Di tarabeiza.", arabic: "دي ترابيزة", options: [{f:"Di tarabeiza.", a:"دي ترابيزة"}, {f:"Da tarabeiza.", a:"ده ترابيزة"}, {f:"Di kanaba.", a:"دي كنبة"}, {f:"Di setara.", a:"دي ستارة"}], correct: 0 },
+                    { image: ASSETS.dolab, prompt: "Eih da? — إيه ده؟", franco: "Da dolab.", arabic: "ده دولاب", options: [{f:"Di dolab.", a:"دي دولاب"}, {f:"Da dolab.", a:"ده دولاب"}, {f:"Da sereir.", a:"ده سرير"}, {f:"Di meraya.", a:"دي مراية"}], correct: 1 }
+                ]
+            },
+            // Round 4: Sort the Objects (Simulated interactive multiple choice categorization)
+            {
+                roundNum: 4,
+                roundName: "Round 4: Masculine or Feminine?",
+                questions: [
+                    { image: ASSETS.marwa7a, franco: "Marwa7a (Fan)", arabic: "مروحة", options: [{f:"Feminine -> Di marwa7a", a:"مؤنث -> دي مروحة"}, {f:"Masculine -> Da marwa7a", a:"مذكر -> ده مروحة"}], correct: 0 },
+                    { image: ASSETS.microwave, franco: "Microwave", arabic: "ميكروويف", options: [{f:"Feminine -> Di microwave", a:"مؤنث -> دي ميكروويف"}, {f:"Masculine -> Da microwave", a:"مذكر -> ده ميكروويف"}], correct: 1 },
+                    { image: ASSETS.saggada, franco: "Saggada (Rug)", arabic: "سجادة", options: [{f:"Feminine -> Di saggada", a:"مؤنث -> دي سجادة"}, {f:"Masculine -> Da saggada", a:"مذكر -> ده سجادة"}], correct: 0 },
+                    { image: ASSETS.maktaba, franco: "Maktaba (Bookcase)", arabic: "مكتبة", options: [{f:"Masculine -> Da maktaba", a:"مذكر -> ده مكتبة"}, {f:"Feminine -> Di maktaba", a:"مؤنث -> دي مكتبة"}], correct: 1 },
+                    { image: ASSETS.sereir, franco: "Sereir (Bed)", arabic: "سرير", options: [{f:"Feminine -> Di sereir", a:"مؤنث -> دي سرير"}, {f:"Masculine -> Da sereir", a:"مذكر -> ده سرير"}], correct: 1 }
+                ]
+            },
+            // Round 5: Final Challenge (Mixed Quiz)
+            {
+                roundNum: 5,
+                roundName: "Round 5: Final Challenge",
+                questions: [
+                    { image: ASSETS.televizyon, prompt: "Select the correct phrase for Television:", franco: "Da televizyon.", arabic: "ده تلفزيون", options: [{f:"Di televizyon.", a:"دي تلفزيون"}, {f:"Da televizyon.", a:"ده تلفزيون"}, {f:"Da korsi.", a:"ده كرسي"}, {f:"Di talaga.", a:"دي تلاجة"}], correct: 1 },
+                    { image: ASSETS.meraya, prompt: "Select the correct phrase for Mirror:", franco: "Di meraya.", arabic: "دي مراية", options: [{f:"Da meraya.", a:"ده مراية"}, {f:"Di meraya.", a:"دي مراية"}, {f:"Di lamba.", a:"دي لمبة"}, {f:"Da dolab.", a:"ده دولاب"}], correct: 1 },
+                    { image: ASSETS.botagaz, prompt: "Select the correct question and answer:", franco: "Eih da? — Da botagaz.", arabic: "إيه ده؟ — ده بوتاجاز", options: [{f:"Eih da? — Da botagaz.", a:"إيه ده؟ — ده بوتاجاز"}, {f:"Eih di? — Di botagaz.", a:"إيه دي؟ — دي بوتاجاز"}], correct: 0 },
+                    { image: ASSETS.setara, prompt: "Select the correct phrase for Curtain:", franco: "Di setara.", arabic: "دي ستارة", options: [{f:"Da setara.", a:"ده ستارة"}, {f:"Di setara.", a:"دي ستارة"}], correct: 1 },
+                    { image: ASSETS.takyeef, prompt: "Select the correct phrase for Air Conditioner:", franco: "Da takyeef.", arabic: "ده تكييف", options: [{f:"Di takyeef.", a:"دي تكييف"}, {f:"Da takyeef.", a:"ده تكييف"}], correct: 1 }
+                ]
+            }
+        ];
+
+        // --- GAME STATE ---
+        let currentRoundIdx = 0;
+        let currentQIdx = 0;
+        let score = 0;
+        let firstAttemptsCorrect = 0;
+        let firstAttemptsIncorrect = 0;
+        let eventualCorrectAnswers = 0;
+        let roundScores = [0, 0, 0, 0, 0];
+        let detailedAnswers = [];
+        let startTime = 0;
+        let timerInterval = null;
+        let secondsElapsed = 0;
+        let audioEnabled = true;
+        let answeredCurrent = false;
+        let currentFirstAttemptFailed = false;
+
+        // --- WEB AUDIO API SOUNDS ---
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playCorrectSound() {
+            if (!audioEnabled) return;
+            initAudio();
+            try {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        function playIncorrectSound() {
+            if (!audioEnabled) return;
+            initAudio();
+            try {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(110, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.4);
+            } catch(e) {}
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            document.getElementById('audioToggle').innerText = audioEnabled ? "🔊 Sound: ON" : "🔇 Sound: OFF";
+        }
+
+        // --- NAVIGATION & GAME FLOW ---
+        function startGame() {
+            const nameInput = document.getElementById('studentName').value.trim();
+            if (!nameInput) {
+                alert("Please enter your student name to start!");
+                document.getElementById('studentName').focus();
+                return;
+            }
+
+            document.getElementById('welcomeScreen').classList.remove('active');
+            document.getElementById('gameScreen').classList.add('active');
+
+            currentRoundIdx = 0;
+            currentQIdx = 0;
+            score = 0;
+            firstAttemptsCorrect = 0;
+            firstAttemptsIncorrect = 0;
+            eventualCorrectAnswers = 0;
+            roundScores = [0, 0, 0, 0, 0];
+            detailedAnswers = [];
+            secondsElapsed = 0;
+
+            startTime = Date.now();
+            timerInterval = setInterval(() => { secondsElapsed++; }, 1000);
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answeredCurrent = false;
+            currentFirstAttemptFailed = false;
+
+            const round = roundsData[currentRoundIdx];
+            const q = round.questions[currentQIdx];
+
+            // Update Header & Progress
+            document.getElementById('roundIndicator').innerText = round.roundName;
+            document.getElementById('scoreTracker').innerText = `Score: ${score}`;
+            
+            let totalQCount = 25;
+            let globalQIndex = (currentRoundIdx * 5) + currentQIdx + 1;
+            document.getElementById('badgeText').innerText = `Question ${globalQIndex} of ${totalQCount}`;
+            document.getElementById('progressBar').style.width = `${(globalQIndex / totalQCount) * 100}%`;
+
+            // Update Question Prompt & Image
+            document.getElementById('questionTitle').innerText = q.prompt || "What Is This?";
+            document.getElementById('questionImage').src = q.image;
+
+            // Reset Feedback & Next Button
+            const feedbackBox = document.getElementById('feedbackBox');
+            feedbackBox.style.display = 'none';
+            feedbackBox.className = 'feedback-box';
+            document.getElementById('nextBtn').style.display = 'none';
+
+            // Load Options
+            const optionsGrid = document.getElementById('optionsGrid');
+            optionsGrid.innerHTML = '';
+
+            // Shuffle options for variety
+            let shuffledOptions = q.options.map((opt, idx) => ({ opt, idx }));
+            shuffledOptions.sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach((item) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span>${item.opt.f}</span><span class="arabic-sub">${item.opt.a}</span>`;
+                btn.onclick = () => checkAnswer(item.idx, q.correct, btn, q);
+                optionsGrid.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIdx, correctIdx, btnElement, questionObj) {
+            if (answeredCurrent) return;
+
+            const feedbackBox = document.getElementById('feedbackBox');
+            const buttons = document.querySelectorAll('.option-btn');
+
+            if (selectedIdx === correctIdx) {
+                // Correct Answer
+                answeredCurrent = true;
+                playCorrectSound();
+                btnElement.classList.add('correct');
+                
+                feedbackBox.style.display = 'block';
+                feedbackBox.className = 'feedback-box correct-msg';
+                feedbackBox.innerHTML = `🎉 Excellent! Correct answer!<br><strong>${questionObj.franco} — ${questionObj.arabic}</strong>`;
+                
+                document.getElementById('nextBtn').style.display = 'block';
+
+                if (!currentFirstAttemptFailed) {
+                    firstAttemptsCorrect++;
+                    score += 4; // 100 points total / 25 questions = 4 pts each
+                    roundScores[currentRoundIdx]++;
+                }
+                eventualCorrectAnswers++;
+
+                detailedAnswers.push({
+                    question: questionObj.prompt || "Identify Object",
+                    selected: questionObj.options[selectedIdx].f,
+                    correct: questionObj.options[correctIdx].f,
+                    first_attempt_correct: !currentFirstAttemptFailed,
+                    attempts: currentFirstAttemptFailed ? 2 : 1
+                });
+
+                document.getElementById('scoreTracker').innerText = `Score: ${score}`;
+
+            } else {
+                // Incorrect Answer
+                playIncorrectSound();
+                btnElement.classList.add('incorrect');
+                btnElement.disabled = true;
+
+                if (!currentFirstAttemptFailed) {
+                    currentFirstAttemptFailed = true;
+                    firstAttemptsIncorrect++;
+                }
+
+                feedbackBox.style.display = 'block';
+                feedbackBox.className = 'feedback-box incorrect-msg';
+                feedbackBox.innerHTML = `❌ Not quite! Try again!<br><small>💡 Hint: Remember masculine nouns use <strong>Da (ده)</strong> and feminine nouns (often ending in -a) use <strong>Di (دي)</strong>.</small>`;
+            }
+        }
+
+        function nextQuestion() {
+            currentQIdx++;
+            if (currentQIdx >= roundsData[currentRoundIdx].questions.length) {
+                currentQIdx = 0;
+                currentRoundIdx++;
+            }
+
+            if (currentRoundIdx >= roundsData.length) {
+                endGame();
+            } else {
+                loadQuestion();
+            }
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            document.getElementById('gameScreen').classList.remove('active');
+            document.getElementById('resultsScreen').classList.add('active');
+
+            const name = document.getElementById('studentName').value;
+            document.getElementById('resName').innerText = name;
+            document.getElementById('resTotal').innerText = "25";
+            document.getElementById('resFirstCorrect').innerText = firstAttemptsCorrect;
+            
+            const accuracy = Math.round((firstAttemptsCorrect / 25) * 100);
+            document.getElementById('resAccuracy').innerText = `${accuracy}%`;
+            document.getElementById('finalScoreDisplay').innerText = `${score} / 100 (${accuracy}%)`;
+
+            const mins = Math.floor(secondsElapsed / 60);
+            const secs = secondsElapsed % 60;
+            document.getElementById('resTime').innerText = `${mins}m ${secs}s`;
+
+            document.getElementById('resRounds').innerText = roundScores.join(" / ");
+
+            // Feedback ranges
+            let feedbackText = "";
+            if (accuracy >= 90) {
+                feedbackText = "Outstanding! You have a strong understanding of DA and DI!";
+            } else if (accuracy >= 75) {
+                feedbackText = "Great job! You are making excellent progress!";
+            } else if (accuracy >= 50) {
+                feedbackText = "Good effort! Keep practicing the object names and DA/DI rules!";
+            } else {
+                feedbackText = "Keep going! Review the examples and try again!";
+            }
+            document.getElementById('congratsMessage').innerText = feedbackText;
+        }
+
+        function restartGame() {
+            document.getElementById('resultsScreen').classList.remove('active');
+            document.getElementById('welcomeScreen').classList.add('active');
+            document.getElementById('submitStatus').innerText = '';
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        // --- FORMSPREE SUBMISSION ---
+        function submitResults() {
+            const submitBtn = document.getElementById('submitBtn');
+            const submitStatus = document.getElementById('submitStatus');
+            submitBtn.disabled = true;
+            submitStatus.style.color = 'var(--primary-lavender)';
+            submitStatus.innerText = "Submitting your results...";
+
+            const payload = {
+                student_name: document.getElementById('studentName').value,
+                student_email: document.getElementById('studentEmail').value || "Not provided",
+                lesson_title: "Egyptian Arabic - Lesson 01: Eih da? / Eih di?",
+                completion_date: new Date().toISOString(),
+                total_questions: 25,
+                correct_first_attempts: firstAttemptsCorrect,
+                incorrect_first_attempts: firstAttemptsIncorrect,
+                eventual_correct_answers: eventualCorrectAnswers,
+                accuracy_percentage: Math.round((firstAttemptsCorrect / 25) * 100) + "%",
+                time_spent: `${Math.floor(secondsElapsed / 60)}m ${secondsElapsed % 60}s`,
+                round_1_score: roundScores[0],
+                round_2_score: roundScores[1],
+                round_3_score: roundScores[2],
+                round_4_score: roundScores[3],
+                round_5_score: roundScores[4],
+                detailed_answers: JSON.stringify(detailedAnswers),
+                mistakes_and_corrections: `First attempts correct: ${firstAttemptsCorrect}/25`
+            };
+
+            fetch('https://formspree.io/f/mvkzygzd', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (response.ok) {
+                    submitStatus.style.color = '#166534';
+                    submitStatus.innerText = "✅ Results successfully submitted to your instructor!";
+                } else {
+                    throw new Error('Submission failed');
+                }
+            })
+            .catch(error => {
+                submitStatus.style.color = '#9a3412';
+                submitStatus.innerText = "❌ Submission failed. Please check your connection and retry.";
+                submitBtn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
